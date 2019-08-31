@@ -9,9 +9,19 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class FIRSTPROJECT_API UMyObject : public UObject
 {
 	GENERATED_BODY()
+
+public:
+
+	UMyObject(); 
+
+	UPROPERTY(BlueprintReadOnly, Category = "MyVariables")
+	float MyFloat;
+
+	UFUNCTION(BlueprintCallable, Category = "MyFunctions")
+	void MyFunction();
 	
 };
