@@ -15,6 +15,7 @@ public:
 	// Sets default values for this actor's properties
 	AFloatingActor();
 
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ActorMeshComponents")
 	UStaticMeshComponent* StaticMesh;
 
@@ -45,7 +46,17 @@ public:
 	bool bInitializedFloatingActorLocations; 
 
 
-protected:
+private: 
+
+	float RunningTime; 
+
+	UPROPERTY(EditAnywhere, Category = "FloatingActor Variables | Wave Parameters")
+	float Amplitude;
+	
+	UPROPERTY(EditAnywhere, Category = "FloatingActor Variables | Wave Parameters")
+	float TimeStretch; 
+	
+	protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

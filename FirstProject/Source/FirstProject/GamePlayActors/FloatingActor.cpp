@@ -20,7 +20,10 @@ AFloatingActor::AFloatingActor()
 	InitialForce = FVector(200000.0f, 0.0f, 0.0f);
 	InitialTorque = FVector(200000.0f, 0.0f, 0.0f);
 	bShouldFloat = false; 
-		
+	RunningTime = 0.0f;
+
+	Amplitude = 1.0f;
+	TimeStretch = 1.0f; 
 }
 
 // Called when the game starts or when spawned
@@ -28,7 +31,16 @@ void AFloatingActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	float InitialX = FMath::FRandRange(-500.0f, 500.0f);
+	float InitialY = FMath::FRandRange(-500.0f, 500.0f);
+	float InitialZ = FMath::FRandRange(0.0f, 500.0f);
+	
+	InitalLocation.X = InitialX; 
+	InitalLocation.Y = InitialY;
+	InitalLocation.Z = InitialZ;
+
 	PlacedLocation = GetActorLocation(); 
+	
 
 	if (bInitializedFloatingActorLocations)
 	{
@@ -53,10 +65,23 @@ void AFloatingActor::Tick(float DeltaTime)
 
 	if (bShouldFloat)
 	{
-		FHitResult OutHitResult; 
-		AddActorLocalOffset(InitalDirection, true, &OutHitResult);
+		FVector NewLocation = GetActorLocation();
+		NewLocation.X = NewLocation.X + Amplitude * FMath::Sin(TimeStretch * RunningTime);
 
-		FVector HitLocation = OutHitResult.Location;
+		NewLocation.Y = NewLocation.Y + Amplitude * FMath::Cos(TimeStretch * RunningTime);
+		
+		
+		SetActorLocation(NewLocation);
+		
+		RunningTime += DeltaTime;
+
+
+		// Update the location of floating actor by incrementing the location FVector every frame
+		// Replaced with Sine function
+		//FHitResult OutHitResult; 
+		//AddActorLocalOffset(InitalDirection, true, &OutHitResult);
+
+		//FVector HitLocation = OutHitResult.Location;
 
 		//UE_LOG(LogTemp, Warning, TEXT("Hit location: X = %f, Y = %f, Z = %f!"), HitLocation.X, HitLocation.Y, HitLocation.Z);
 
