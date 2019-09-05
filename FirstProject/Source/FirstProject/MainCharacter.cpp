@@ -4,6 +4,9 @@
 #include "MainCharacter.h"
 #include "GameFramework/Controller.h"
 #include "Gameframework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/World.h"
 #include "Camera/CameraComponent.h"
 
 // Sets default values
@@ -18,6 +21,8 @@ AMainCharacter::AMainCharacter()
 	CameraBoom->TargetArmLength = 600.0f; // Length of Spring Arm, camera will follow at this distance
 	CameraBoom->bUsePawnControlRotation = true; // Rotate Spring Arm based on controller
 
+	// Set size for collision capsule
+	GetCapsuleComponent()->SetCapsuleSize(48.0f, 100.0f);
 	
 	// Create Camera to follow Main Character
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -28,6 +33,17 @@ AMainCharacter::AMainCharacter()
 	BaseTurnRate = 65.0f; 
 	BaseLookUpRate = 65.0f; 
 
+	// Don't rotate MainCharacter when controller rotates
+	// Should only affect the camera
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationPitch = false; 
+	bUseControllerRotationRoll = false; 
+
+	// Configure character move to face direction of movement
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	GetCharacterMovement()->JumpZVelocity = 650.0f; // Velocity at jump, will determine height
+	GetCharacterMovement()->AirControl = 0.2f; // Allows control of character while in air.  Smaller number means less control
 }
 
 // Called when the game starts or when spawned
@@ -49,6 +65,30 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// Check that PlayerInput is valid
+	check(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+
+	/** Call MoveForward when any of the keys/buttons associated with the Axis Mapping "MoveForward" are pressed
+	"MoveForward" is the name of Axis Mapping in Project Settings - Input.  
+	*/
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMainCharacter::MoveForward);
+
+	/** Call MoveRight when any of the keys/buttons associated with the Axis Mapping "MoveRight" are pressed
+	"MoveRight" is the name of Axis Mapping in Project Settings - Input.
+	*/
+	PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
+
+	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+
+	PlayerInputComponent->BindAxis("TurnRate", this, &AMainCharacter::TurnAtRate);
+
+	PlayerInputComponent->BindAxis("LookUpRate", this, &AMainCharacter::LookUpAtRate);
 }
 
 void AMainCharacter::MoveForward(float value)
@@ -81,5 +121,15 @@ void AMainCharacter::MoveRight(float value)
 		// Adding movement input in the direction calculated above
 		AddMovementInput(Direction, value);
 	}
+}
+
+void AMainCharacter::TurnAtRate(float Rate)
+{
+	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AMainCharacter::LookUpAtRate(float Rate)
+{
+	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 

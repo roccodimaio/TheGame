@@ -49,4 +49,18 @@ public:
 
 	// Called for side to side input from keyboard, mouse, and controller
 	void MoveRight(float value);
+
+	/** Called via input to turn a given rate
+	*@param Rate This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+	*/
+	void TurnAtRate(float Rate);
+
+	/** Called via input to look up/down at a given rate
+	*@param Rate This is a normalized rate, i.e. 1.0 means 100% of desired look up/down rate
+	*/
+	void LookUpAtRate(float Rate);
+
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
 };
