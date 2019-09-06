@@ -27,6 +27,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "FloorSwitch")
 	UStaticMeshComponent* Door;
 
+	/** Initial location for the door */
+	UPROPERTY(BlueprintReadWrite, Category = "Floor Switch")
+	FVector InitialDoorLocation; 
+
+	/** Initial location for switch */
+	UPROPERTY(BlueprintReadWrite, Category = "Floor Switch")
+	FVector InitialSwitchLocation;
 
 
 protected:
@@ -51,4 +58,22 @@ public:
 		UPrimitiveComponent* OtherComp, 
 		int32 OtherBodyIndex);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Floor Switch")
+	void RaiseDoor();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Floor Switch")
+	void LowerDoor();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Floor Switch")
+	void RaiseFloorSwitch();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Floor Switch")
+	void LowerFloorSwitch();
+
+	UFUNCTION(BlueprintCallable, Category = "Floor Switch")
+	void UpdateDoorLocation(float Z);
+
+	UFUNCTION(BlueprintCallable, Category = "Floor Switch")
+	void UpdateFloorSwitchLocation(float Z);
 };
+
