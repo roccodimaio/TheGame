@@ -42,7 +42,7 @@ AMainCharacter::AMainCharacter()
 	// Configure character move to face direction of movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 650.0f; // Velocity at jump, will determine height
+	GetCharacterMovement()->JumpZVelocity = 250.0f; // Velocity at jump, will determine height
 	GetCharacterMovement()->AirControl = 0.2f; // Allows control of character while in air.  Smaller number means less control
 }
 

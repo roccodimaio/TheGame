@@ -30,9 +30,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Platform")
 	float InterpSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Platform")
+	float InterpTime;
+
+	// Used to delay platform movement
 	FTimerHandle InterpTimer; 
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Platform")
+	bool bInterping; 
 
+	// Distance between platform starting and ending locations
+	float Distance; 
 
 protected:
 	// Called when the game starts or when spawned
@@ -41,5 +49,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void ToggleInterping(); 
+
+	void SwapVectors(FVector& VecOne, FVector& VecTwo);
 
 };
