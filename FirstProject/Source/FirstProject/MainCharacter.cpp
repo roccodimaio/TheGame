@@ -49,10 +49,12 @@ AMainCharacter::AMainCharacter()
 	Health = 65.0f;
 	MaxMana = 200.0f;
 	Mana = 150.0f;
-
-	PowerCells = 0; 
+	Stamina = 200.0f; 
+	MaxStamina = 300.0f; 
+	PowerCells = 1; 
 
 }
+
 
 // Called when the game starts or when spawned
 void AMainCharacter::BeginPlay()
@@ -141,3 +143,31 @@ void AMainCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
+
+void AMainCharacter::IncrementCoin(int32 Amount)
+{
+	PowerCells += Amount; 
+
+	UE_LOG(LogTemp, Warning, TEXT("Coins %d"), PowerCells);
+	
+}
+
+// Reduce health when damage is taken
+void AMainCharacter::DecrementHealth(float Amount)
+{
+	if (Health - Amount <= 0.0f)
+	{
+		Health -= Amount; 
+		Die();
+	}
+	else
+	{
+		Health -= Amount; 
+	}
+}
+
+// Die when HP is <= 0
+void AMainCharacter::Die()
+{
+
+}

@@ -52,9 +52,19 @@ public:
 	float MaxMana;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
+	float Stamina;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PlayerStats")
+	float MaxStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
 	int32 PowerCells; 
 
+	void IncrementCoin(int32 Amount);
 
+	void DecrementHealth(float Amount);
+
+	void Die(); 
 
 
 protected:
