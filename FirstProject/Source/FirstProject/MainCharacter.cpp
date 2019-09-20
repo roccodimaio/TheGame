@@ -44,6 +44,14 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 250.0f; // Velocity at jump, will determine height
 	GetCharacterMovement()->AirControl = 0.2f; // Allows control of character while in air.  Smaller number means less control
+
+	MaxHealth = 100.0f;
+	Health = 65.0f;
+	MaxMana = 200.0f;
+	Mana = 150.0f;
+
+	PowerCells = 0; 
+
 }
 
 // Called when the game starts or when spawned

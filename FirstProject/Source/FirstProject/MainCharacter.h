@@ -19,18 +19,42 @@ public:
 
 	// Add SpringArmComponent to MainCharacter - Used to position the camera behind the MainCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAcces = "true"))
-	class USpringArmComponent* CameraBoom;
+		class USpringArmComponent* CameraBoom;
 
 	// Add CameraComponent to MainCharacter - Camera to follow MainCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
+		class UCameraComponent* FollowCamera;
 
 	// Base turn rates to scale turning functions for the camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	float BaseTurnRate;
+		float BaseTurnRate;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	float BaseLookUpRate;
+		float BaseLookUpRate;
+
+	/**
+
+
+	PlayerStats
+
+	*/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
+	float Health;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PlayerStats")
+	float MaxHealth; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
+	float Mana;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PlayerStats")
+	float MaxMana;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
+	int32 PowerCells; 
+
+
 
 
 protected:
