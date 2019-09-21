@@ -49,9 +49,21 @@ AMainCharacter::AMainCharacter()
 	Health = 65.0f;
 	MaxMana = 200.0f;
 	Mana = 150.0f;
-	Stamina = 200.0f; 
-	MaxStamina = 300.0f; 
+	Stamina = 120.0f; 
+	MaxStamina = 150.0f; 
 	PowerCells = 1; 
+
+	RunningSpeed = 650.0f; 
+	SprintingSpeed = 900.0f; 
+
+	bSprintingKeyPressed = false; 
+
+	// Initialize ENUMS
+	MovementStatus = EMovementStatus::EMS_Normal;
+	StaminaStatus = EStaminaStatus::ESS_Normal;
+	
+	StaminaDrainRate = 25.0f; 
+	MinSprintStamina = 50.0f; 
 
 }
 
@@ -68,6 +80,97 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float DeltaStamina = StaminaDrainRate * DeltaTime;
+	
+	switch (StaminaStatus)
+	{
+	case EStaminaStatus::ESS_Normal:
+		if (bSprintingKeyPressed) // Sprinting key pressed
+		{
+			// Check if next change will put us into the BelowMinimum state
+			if (Stamina - DeltaStamina <= MinSprintStamina)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_BelowMinimum);
+				Stamina -= DeltaStamina; 
+			}
+			else
+			{
+				Stamina -= DeltaStamina;
+			}
+
+			SetMovementStatus(EMovementStatus::EMS_Sprinting);
+		}
+		else // Sprinting key not pressed
+		{
+			if (Stamina + DeltaStamina >= MaxStamina)
+			{
+				Stamina = MaxStamina; 
+			}
+			else
+			{
+				Stamina += DeltaStamina;
+			}
+			SetMovementStatus(EMovementStatus::EMS_Normal);
+		}
+		break;
+	case EStaminaStatus::ESS_BelowMinimum:
+		if (bSprintingKeyPressed) // Sprinting key pressed
+		{
+			if (Stamina - DeltaStamina <= 0.0f)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_Exhausted);
+				Stamina = 0;
+				SetMovementStatus(EMovementStatus::EMS_Normal);
+			}
+			else
+			{
+				Stamina -= DeltaStamina; 
+				SetMovementStatus(EMovementStatus::EMS_Sprinting);
+			}
+		}
+		else // Sprinting key not pressed
+		{
+			if (Stamina + DeltaStamina >= MinSprintStamina)
+			{
+				SetStaminaStatus(EStaminaStatus::ESS_Normal);
+				Stamina += DeltaStamina;
+			}
+			else
+			{
+				Stamina += DeltaStamina; 
+			}
+			SetMovementStatus(EMovementStatus::EMS_Normal);
+		}
+		break;
+	case EStaminaStatus::ESS_Exhausted:
+		if (bSprintingKeyPressed)
+		{
+			Stamina = 0.0f;
+		}
+		else
+		{
+			SetStaminaStatus(EStaminaStatus::ESS_ExhaustedRecovering);
+				Stamina += DeltaStamina; 
+		}
+		SetMovementStatus(EMovementStatus::EMS_Normal);
+		break;
+	case EStaminaStatus::ESS_ExhaustedRecovering:
+		if (Stamina + DeltaStamina >= MinSprintStamina)
+		{
+			SetStaminaStatus(EStaminaStatus::ESS_Normal);
+			Stamina += DeltaStamina; 
+		}
+		else
+		{
+			Stamina += DeltaStamina; 
+		}
+		SetMovementStatus(EMovementStatus::EMS_Normal);
+		break;
+	default:
+		;
+	}
+
+
 }
 
 // Called to bind functionality to input
@@ -81,6 +184,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AMainCharacter::SprintingKeyPressed);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AMainCharacter::SprintingKeyReleased);
 
 	/** Call MoveForward when any of the keys/buttons associated with the Axis Mapping "MoveForward" are pressed
 	"MoveForward" is the name of Axis Mapping in Project Settings - Input.  
@@ -170,4 +275,28 @@ void AMainCharacter::DecrementHealth(float Amount)
 void AMainCharacter::Die()
 {
 
+}
+
+// Setting the movement status and changing the speed based on our state
+void AMainCharacter::SetMovementStatus(EMovementStatus Status)
+{
+	MovementStatus = Status; 
+	if (MovementStatus == EMovementStatus::EMS_Sprinting)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = SprintingSpeed; 
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = RunningSpeed; 
+	}
+}
+
+void AMainCharacter::SprintingKeyPressed()
+{
+	bSprintingKeyPressed = true; 
+}
+
+void AMainCharacter::SprintingKeyReleased()
+{
+	bSprintingKeyPressed = false; 
 }

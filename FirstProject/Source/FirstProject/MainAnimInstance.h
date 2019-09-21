@@ -16,20 +16,21 @@ class FIRSTPROJECT_API UMainAnimInstance : public UAnimInstance
 
 public:
 
-	virtual void NativeInitializeAnimation() override; 
+	virtual void NativeInitializeAnimation() override;
 
 	UFUNCTION(BlueprintCallable, Category = "AnimationProperties")
-	void UpdateAnimationProperties();
-	
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	float MovementSpeed; 
+		void UpdateAnimationProperties();
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	bool bIsInAir; 
+		float MovementSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	class APawn* Pawn; 
-	
+		bool bIsInAir;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+		class APawn* Pawn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+		class AMainCharacter* MainCharacter;
 };
