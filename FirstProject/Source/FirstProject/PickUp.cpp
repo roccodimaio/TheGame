@@ -23,6 +23,11 @@ void APickUp::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* O
 		if (MainCharacter)
 		{
 			MainCharacter->IncrementCoin(CoinCount);
+
+			// Add the location (FVector) of where the item was picked up to the PickupLocations TArray declared in MainCharacter
+			MainCharacter->PickupLocations.Add(GetActorLocation());
+
+			Destroy();
 		}
 	}
 }

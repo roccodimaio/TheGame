@@ -37,6 +37,12 @@ public:
 	// Sets default values for this character's properties
 	AMainCharacter();
 
+	// TArray container of type FVector
+	TArray<FVector> PickupLocations; 
+	
+	UFUNCTION(BlueprintCallable)
+	void ShowPickupLocations();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ENUMs")
 	EMovementStatus MovementStatus; 
 
@@ -153,5 +159,13 @@ public:
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items")
+		class AWeapon* EquippedWeapon;
+
+	FORCEINLINE void EquippedWeapton(AWeapon* WeaponToSet)
+	{
+		EquippedWeapon = WeaponToSet;
+	}
 
 };

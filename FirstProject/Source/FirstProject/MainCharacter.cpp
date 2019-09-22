@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -275,6 +276,19 @@ void AMainCharacter::DecrementHealth(float Amount)
 void AMainCharacter::Die()
 {
 
+}
+
+void AMainCharacter::ShowPickupLocations()
+{
+	
+	// Loop through TArray PickupLocations and draw a red debug circle at each location
+	for (auto Location : PickupLocations)
+	{
+		// Will draw a red circle on the screen for 15 seconds 
+		UKismetSystemLibrary::DrawDebugSphere(this, Location, 25.0f, 8, FLinearColor::Green, 15.0f, 0.5f);
+	}
+	
+	
 }
 
 // Setting the movement status and changing the speed based on our state
