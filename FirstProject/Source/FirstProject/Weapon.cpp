@@ -5,31 +5,50 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "MainCharacter.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 
 AWeapon::AWeapon()
 {
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalMesh->SetupAttachment(GetRootComponent());
+	
+	bWaponParticles = false; 
+
+	WeaponState = EWeaponState::EWS_Pickup; 
+
 }
 
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Super::OnOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-	if (OtherActor)
+	if ((WeaponState == EWeaponState::EWS_Pickup) && OtherActor)
 	{
 		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
 
 		if (MainCharacter)
 		{
-			Equip(MainCharacter);
+			// Set the overlapping item to the OverlappingItem variable in MainCharacter
+			MainCharacter->SetActiveOverlappingItem(this);
 		}
 	}
 }
 
 void AWeapon::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	Super::OnOverlapEnd(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex); 
+	Super::OnOverlapEnd(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
+
+	if (OtherActor)
+	{
+		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
+
+		if (MainCharacter)
+		{
+			MainCharacter->SetActiveOverlappingItem(nullptr);
+		}
+	}
 }
 
 void AWeapon::Equip(AMainCharacter* Char)
@@ -53,6 +72,24 @@ void AWeapon::Equip(AMainCharacter* Char)
 		{
 			RightHandSocket->AttachActor(this, Char->GetMesh());
 			bRotate = false;
+
+			// Destoy currently equiped weapon
+			//Char->GetEquippedWeapon()->Destroy(); 
+
+			// Set the EquipWeapon variable from MainCharacter to the attached Weapon
+			Char->EquippedWeapton(this);
+			Char->SetActiveOverlappingItem(nullptr);
+
+		}
+
+		if (OnEquipSound)
+		{
+			UGameplayStatics::PlaySound2D(this, OnEquipSound);
+		}
+
+		if (!bWaponParticles)
+		{
+			IdleParticlesComponent->Deactivate(); 
 		}
 	}
 }

@@ -78,22 +78,25 @@ public:
 	/** Released to strop sprinting */
 	void SprintingKeyReleased(); 
 
+	
+	// Base turn rates to scale turning functions for the camera
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	float BaseTurnRate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	float BaseLookUpRate;
+	
 	//Subobjects - Components within a blueprint
 
 	// Add SpringArmComponent to MainCharacter - Used to position the camera behind the MainCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAcces = "true"))
-		class USpringArmComponent* CameraBoom;
+	class USpringArmComponent* CameraBoom;
 
 	// Add CameraComponent to MainCharacter - Camera to follow MainCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-		class UCameraComponent* FollowCamera;
+	class UCameraComponent* FollowCamera;
 
-	// Base turn rates to scale turning functions for the camera
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-		float BaseTurnRate;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-		float BaseLookUpRate;
+	
 
 	/**
 
@@ -157,15 +160,33 @@ public:
 	*/
 	void LookUpAtRate(float Rate);
 
+	void ActionButtonPressed();
+	void ActionButtonReleased();
+
+	bool bActionDown; 
+
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Items")
-		class AWeapon* EquippedWeapon;
+	class AWeapon* EquippedWeapon;
 
-	FORCEINLINE void EquippedWeapton(AWeapon* WeaponToSet)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items")
+	class AItem* ActiveOverlappingItem;
+	
+	void EquippedWeapton(AWeapon* WeaponToSet);
+	
+
+	FORCEINLINE void SetActiveOverlappingItem(AItem* Item)
 	{
-		EquippedWeapon = WeaponToSet;
+		ActiveOverlappingItem = Item;
 	}
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anims")
+	bool bAttacking;
 
+	void Attack();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
+	class UAnimMontage* CombatMontage; 
 };

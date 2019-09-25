@@ -9,6 +9,9 @@
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Weapon.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimInstance.h"
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -59,6 +62,8 @@ AMainCharacter::AMainCharacter()
 
 	bSprintingKeyPressed = false; 
 
+	bActionDown = false; 
+
 	// Initialize ENUMS
 	MovementStatus = EMovementStatus::EMS_Normal;
 	StaminaStatus = EStaminaStatus::ESS_Normal;
@@ -83,6 +88,8 @@ void AMainCharacter::Tick(float DeltaTime)
 
 	float DeltaStamina = StaminaDrainRate * DeltaTime;
 	
+	
+	// Update the Stamina bar every tick
 	switch (StaminaStatus)
 	{
 	case EStaminaStatus::ESS_Normal:
@@ -188,6 +195,10 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AMainCharacter::SprintingKeyPressed);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AMainCharacter::SprintingKeyReleased);
 
+	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &AMainCharacter::ActionButtonPressed);
+	PlayerInputComponent->BindAction("Action", IE_Released, this, &AMainCharacter::ActionButtonReleased);
+
+
 	/** Call MoveForward when any of the keys/buttons associated with the Axis Mapping "MoveForward" are pressed
 	"MoveForward" is the name of Axis Mapping in Project Settings - Input.  
 	*/
@@ -247,6 +258,59 @@ void AMainCharacter::TurnAtRate(float Rate)
 void AMainCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AMainCharacter::ActionButtonPressed()
+{
+	// Functionality to equip weapong
+	bActionDown = true;
+	if (ActiveOverlappingItem)  // if main character is overlapping an item
+	{
+		AWeapon* Weapon = Cast<AWeapon>(ActiveOverlappingItem);  // Create an instance of AWeapon and cast the overlapping item to it
+
+		if (Weapon) // if the casting was successful
+		{
+			Weapon->Equip(this); // Call the Equip function within AWeapon and pass in the MainCharacter as the AActor parameter
+
+			SetActiveOverlappingItem(nullptr); // Item is equipment and no longer overlapping.  Reset ActiveOverlappingItem to null
+		}
+	}
+	else if(EquippedWeapon)  //if not overlapping an item and a weapon is equipped and ActionButton is pressed then execute code below
+	{
+		Attack();
+
+	}
+}
+
+void AMainCharacter::ActionButtonReleased()
+{
+
+}
+
+void AMainCharacter::EquippedWeapton(AWeapon* WeaponToSet)
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Destroy();
+	}
+
+	EquippedWeapon = WeaponToSet; 
+}
+
+void AMainCharacter::Attack()
+{
+	bAttacking = true;
+
+	// Define the AnimInstance with the AnimInstance associated with the Main Character
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && CombatMontage)
+	{
+		// Play Combat Montage
+		AnimInstance->Montage_Play(CombatMontage, 1.35f); // Play the montage CombatMontage at 135% speed
+		AnimInstance->Montage_JumpToSection(FName("Attack_1"), CombatMontage); // Play only the Attack_1 Section on CombatMontage
+	}
+
+
 }
 
 
