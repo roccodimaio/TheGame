@@ -88,7 +88,8 @@ void AMainCharacter::Tick(float DeltaTime)
 
 	float DeltaStamina = StaminaDrainRate * DeltaTime;
 	
-	
+	//UE_LOG(LogTemp, Warning, TEXT("ActionDown = %s!"), bActionDown ? TEXT("True") : TEXT("False"));
+
 	// Update the Stamina bar every tick
 	switch (StaminaStatus)
 	{
@@ -220,7 +221,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::MoveForward(float value)
 {
-	if ((Controller != nullptr) && (value != 0.0f))
+	if ((Controller != nullptr) && (value != 0.0f) && (!bAttacking))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation(); 
@@ -236,7 +237,7 @@ void AMainCharacter::MoveForward(float value)
 
 void AMainCharacter::MoveRight(float value)
 {
-	if ((Controller != nullptr) && (value != 0.0f))
+	if ((Controller != nullptr) && (value != 0.0f), (!bAttacking))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -278,13 +279,12 @@ void AMainCharacter::ActionButtonPressed()
 	else if(EquippedWeapon)  //if not overlapping an item and a weapon is equipped and ActionButton is pressed then execute code below
 	{
 		Attack();
-
 	}
 }
 
 void AMainCharacter::ActionButtonReleased()
 {
-
+	bActionDown = false; 
 }
 
 void AMainCharacter::EquippedWeapton(AWeapon* WeaponToSet)
@@ -299,18 +299,58 @@ void AMainCharacter::EquippedWeapton(AWeapon* WeaponToSet)
 
 void AMainCharacter::Attack()
 {
-	bAttacking = true;
+	//UE_LOG(LogTemp, Warning, TEXT("In Attack()!, bAttacking is %s"), bAttacking ? TEXT("True") : TEXT("False"));
 
-	// Define the AnimInstance with the AnimInstance associated with the Main Character
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && CombatMontage)
+	if (!bAttacking)
 	{
-		// Play Combat Montage
-		AnimInstance->Montage_Play(CombatMontage, 1.35f); // Play the montage CombatMontage at 135% speed
-		AnimInstance->Montage_JumpToSection(FName("Attack_1"), CombatMontage); // Play only the Attack_1 Section on CombatMontage
+		bAttacking = true;
+		
+		// Define the AnimInstance with the AnimInstance associated with the Main Character
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && CombatMontage)
+		{
+			int32 Selection = FMath::RandRange(0, 1);  //create a random number between 0 and 1 (either 0 or 1)
+			
+			// switch statement, will run the appropriate case based on teh value of Section
+			switch (Selection)
+			{
+			case 0:
+
+				// Play Combat Montage
+				AnimInstance->Montage_Play(CombatMontage, 2.2f); // Play the montage CombatMontage at 135% speed
+				AnimInstance->Montage_JumpToSection(FName("Attack_1"), CombatMontage); // Play only the Attack_1 Section on CombatMontage
+				break;
+			case 1:
+				
+				// Play Combat Montage
+				AnimInstance->Montage_Play(CombatMontage, 1.5f); // Play the montage CombatMontage at 135% speed
+				AnimInstance->Montage_JumpToSection(FName("Attack_2"), CombatMontage); // Play only the Attack_1 Section on CombatMontage
+				break;
+			
+			default:
+				;
+
+			}
+			
+			
+		}
 	}
+	
 
 
+}
+
+void AMainCharacter::AttackEnd()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("In AttackEnd()!"));
+	
+	bAttacking = false; 
+
+	// if the ActionButton is held down it will automatically call Attack(); 
+	if (bActionDown)
+	{
+		Attack(); 
+	}
 }
 
 
