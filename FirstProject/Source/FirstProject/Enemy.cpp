@@ -2,6 +2,9 @@
 
 
 #include "Enemy.h"
+#include "Components/SphereComponent.h"
+#include "AIController.h"
+#include "MainCharacter.h"
 
 
 // Sets default values
@@ -10,12 +13,30 @@ AEnemy::AEnemy()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	
+	AgroSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AgroSphere")); // Create a USphereComponent in the class (Will show up on the blueprint once a blueprint class is created)
+	AgroSphere->SetupAttachment(GetRootComponent()); //Attached AgroSpehere to the RootComponent of the Enemy.  Character components should attach to the Root instead of trying to set as Root
+	AgroSphere->InitSphereRadius(600.0f); //Set radius of AgroSphere at 600 from center of RootComponent
+	
+	CombatSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CombatSphere")); // Create a USphereComponent in the class (Will show up on the blueprint once a blueprint class is created)
+	CombatSphere->SetupAttachment(GetRootComponent());  //Attached CombatSpehere to the RootComponent of the Enemy.  Character components should attach to the Root instead of trying to set as Root
+	CombatSphere->InitSphereRadius(75.0f); //Set radius of AgroSphere at 600 from center of RootComponent
 }
 
 // Called when the game starts or when spawned
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Assign the Controller of enemey to the AIController on BeginPlay, providing a reference to the AIController
+	AIController = Cast<AAIController>(GetController());
+
+	// Bind Overlap Events to Overlap Component functions
+	AgroSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::AgroSphereOnOverlapBegin);
+	AgroSphere->OnComponentEndOverlap.AddDynamic(this, &AEnemy::AgroSphereOnOverlapEnd);
+
+	CombatSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::CombatSphereOnOverlapBegin);
+	CombatSphere->OnComponentEndOverlap.AddDynamic(this, &AEnemy::CombatSphereOnOverlapEnd);
 	
 }
 
@@ -31,5 +52,61 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AEnemy::AgroSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor)
+	{
+		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
+
+		if (MainCharacter)
+		{
+			MoveToTarget(MainCharacter);
+		}
+		
+	}
+	
+}
+
+void AEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+
+}
+
+void AEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+}
+
+void AEnemy::CombatSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+
+}
+
+void AEnemy::MoveToTarget(AMainCharacter* Target)
+{
+	// SetEnemyMoveStatus to MoveToTarget
+	SetEnemyMovementStatus(EEnemyMovementStatus::EMS_MoveToTarget);
+
+	UE_LOG(LogTemp, Warning, TEXT("In MoveToTarget()"));
+	if (AIController)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("In MoveToTarget()_02"));
+
+		// Move to Target
+		// Creating input parameters for AAIController::MoveTo function
+		FAIMoveRequest MoveRequest;
+		MoveRequest.SetGoalActor(Target);
+		MoveRequest.SetAcceptanceRadius(5.0f);
+
+		FNavPathSharedPtr NavPath; 
+
+		// Call AIController::MoveTo function
+		AIController->MoveTo(MoveRequest, &NavPath);
+
+
+
+	}
 }
 

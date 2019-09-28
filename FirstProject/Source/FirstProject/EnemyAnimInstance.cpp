@@ -25,12 +25,15 @@ void UEnemyAnimInstance::UpdateAnimationProperties()
 
 		if (Pawn)
 		{
-			// Get characters current velocity
-			FVector Speed = Pawn->GetVelocity();
-			FVector LateralSpeed = FVector(Speed.X, Speed.Y, 0.0f);
-			MovementSpeed = LateralSpeed.Size();
-
 			Enemy = Cast<AEnemy>(Pawn);
 		}
+	}
+
+	if (Pawn)
+	{
+		// Get characters current velocity
+		FVector Speed = Pawn->GetVelocity();
+		FVector LateralSpeed = FVector(Speed.X, Speed.Y, 0.0f);
+		MovementSpeed = LateralSpeed.Size();
 	}
 }
