@@ -90,6 +90,8 @@ void AMainCharacter::Tick(float DeltaTime)
 	
 	//UE_LOG(LogTemp, Warning, TEXT("ActionDown = %s!"), bActionDown ? TEXT("True") : TEXT("False"));
 
+	//UE_LOG(LogTemp, Warning, TEXT("Location = %s!"), *this->GetActorLocation().ToString());
+
 	// Update the Stamina bar every tick
 	switch (StaminaStatus)
 	{

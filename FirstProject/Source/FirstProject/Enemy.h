@@ -74,6 +74,12 @@ public:
 	virtual void CombatSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	// Function to move Enemy to the MainCharacter's location
+	UFUNCTION(BlueprintCallable)
 	void MoveToTarget(class AMainCharacter* Target); 
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
+	bool bOverlappingCombatSphere; 
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI")
+	AMainCharacter* CombatTarget;
 };
