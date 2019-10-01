@@ -46,6 +46,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class AAIController* AIController;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float MaxHealth; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float Damage; 
+
+	// Particle system for when Enemy gets hit
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	class UParticleSystem* HitParticles; 
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

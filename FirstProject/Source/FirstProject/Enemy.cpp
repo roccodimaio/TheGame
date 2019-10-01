@@ -24,7 +24,12 @@ AEnemy::AEnemy()
 	CombatSphere->InitSphereRadius(75.0f); //Set radius of AgroSphere at 600 from center of RootComponent
 
 	bOverlappingCombatSphere = false; 
-}
+
+	Health = 75.0f;
+	MaxHealth = 100.0f; 
+	Damage = 10.0f; 
+
+	}
 
 // Called when the game starts or when spawned
 void AEnemy::BeginPlay()
