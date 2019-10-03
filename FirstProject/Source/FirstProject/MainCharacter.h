@@ -192,4 +192,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anims")
 	class UAnimMontage* CombatMontage; 
+
+	// Function to play sound from AnimMontage notifiers
+	UFUNCTION(BlueprintCallable)
+	void PlaySwingSound();
 };

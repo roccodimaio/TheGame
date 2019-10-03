@@ -117,6 +117,7 @@ void AWeapon::Equip(AMainCharacter* Char)
 		}
 
 		if (OnEquipSound)
+
 		{
 			UGameplayStatics::PlaySound2D(this, OnEquipSound);
 		}
@@ -153,6 +154,10 @@ void AWeapon::CombatOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 
 
 			}
+			if (Enemy->HitSound)
+			{
+				UGameplayStatics::PlaySound2D(this, Enemy->HitSound);
+			}
 
 		}
 	}
@@ -168,7 +173,7 @@ void AWeapon::ActivateCollision()
 {
 	// Enable collision to QueryOnly
 	CombatCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-
+	
 }
 
 void AWeapon::DeactivateCollision()

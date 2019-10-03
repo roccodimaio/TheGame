@@ -9,7 +9,9 @@
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Weapon.h"
+#include "Sound/SoundCue.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimInstance.h"
 
@@ -336,6 +338,7 @@ void AMainCharacter::Attack()
 			
 			
 		}
+				
 	}
 	
 
@@ -352,6 +355,14 @@ void AMainCharacter::AttackEnd()
 	if (bActionDown)
 	{
 		Attack(); 
+	}
+}
+
+void AMainCharacter::PlaySwingSound()
+{
+	if (EquippedWeapon->SwingSound)
+	{
+		UGameplayStatics::PlaySound2D(this, EquippedWeapon->SwingSound);
 	}
 }
 
