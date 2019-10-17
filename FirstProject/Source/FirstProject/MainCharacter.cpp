@@ -10,10 +10,14 @@
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Weapon.h"
 #include "Sound/SoundCue.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimInstance.h"
+#include "Enemy.h"
+#include "MainPlayerController.h"
+
 
 // Sets default values
 AMainCharacter::AMainCharacter()
@@ -73,6 +77,11 @@ AMainCharacter::AMainCharacter()
 	StaminaDrainRate = 25.0f; 
 	MinSprintStamina = 50.0f; 
 
+	InterpSpeed = 15.0f; 
+	bInterpToEnemy = false; 
+
+	bHasCombatTarget = false; 
+
 }
 
 
@@ -80,6 +89,8 @@ AMainCharacter::AMainCharacter()
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	MainPlayerController = Cast<AMainPlayerController>(GetController());
 	
 }
 
@@ -183,8 +194,32 @@ void AMainCharacter::Tick(float DeltaTime)
 		;
 	}
 
+	if (bInterpToEnemy && CombatTarget)
+	{
+		// Identify and assign to a variable the Yaw value of the Enemy's location
+		FRotator LookAtYaw = GetLookAtRotationYaw(CombatTarget->GetActorLocation());
 
+		// Smoothly turn the MainCharacter to face the target
+		// Identify and assign to a variable to amount of rotation for MainCharacter this frame
+		FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), LookAtYaw, DeltaTime, InterpSpeed); 
+
+		SetActorRotation(InterpRotation); 
+	}
+
+	// Check if there is an Enemy CombatTarget
+	if (CombatTarget)
+	{
+		// Assign the FVector CombatTargetLocation variable to the location of the Enemy CombatTarget
+		CombatTargetLocation = CombatTarget->GetActorLocation(); 
+		
+		if (MainPlayerController)
+		{
+			// Sets the variable EnemyLocation in teh MainPlayerController class the the location of the Enemy
+			MainPlayerController->EnemyLocation = CombatTargetLocation;
+		}
+	}
 }
+
 
 // Called to bind functionality to input
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -308,6 +343,8 @@ void AMainCharacter::Attack()
 	if (!bAttacking)
 	{
 		bAttacking = true;
+
+		SetInterpToEnemy(true);
 		
 		// Define the AnimInstance with the AnimInstance associated with the Main Character
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -350,6 +387,7 @@ void AMainCharacter::AttackEnd()
 	//UE_LOG(LogTemp, Warning, TEXT("In AttackEnd()!"));
 	
 	bAttacking = false; 
+	bInterpToEnemy = false; 
 
 	// if the ActionButton is held down it will automatically call Attack(); 
 	if (bActionDown)
@@ -389,10 +427,21 @@ void AMainCharacter::DecrementHealth(float Amount)
 	}
 }
 
+float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	DecrementHealth(DamageAmount);
+	return DamageAmount;
+}
+
 // Die when HP is <= 0
 void AMainCharacter::Die()
 {
-
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && CombatMontage)
+	{
+		AnimInstance->Montage_Play(CombatMontage, 1.0f);
+		AnimInstance->Montage_JumpToSection(FName("Death"));
+	}
 }
 
 void AMainCharacter::ShowPickupLocations()
@@ -406,6 +455,22 @@ void AMainCharacter::ShowPickupLocations()
 	}
 	
 	
+}
+
+void AMainCharacter::SetInterpToEnemy(bool Interp)
+{
+	bInterpToEnemy = Interp;
+}
+
+FRotator AMainCharacter::GetLookAtRotationYaw(FVector Target)
+{
+	// Find rotation required to turn MainCharacter to Target
+	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Target);
+
+	// Obtain Yaw value of the LookAtRotation
+	FRotator LookAtRotationYaw(0.0f, LookAtRotation.Yaw, 0.0f);
+
+	return LookAtRotationYaw;
 }
 
 // Setting the movement status and changing the speed based on our state

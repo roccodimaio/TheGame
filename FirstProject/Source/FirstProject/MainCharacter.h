@@ -37,6 +37,28 @@ public:
 	// Sets default values for this character's properties
 	AMainCharacter();
 
+	// Variable for the MainPlayerController class
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Controller")
+	class AMainPlayerController* MainPlayerController;
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bHasCombatTarget; 
+
+	FORCEINLINE void SetHasCombatTarget(bool HasTarget) { bHasCombatTarget = HasTarget; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	FVector CombatTargetLocation;
+
+
+	// Particle system for when Enemy gets hit
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	class UParticleSystem* HitParticles;
+
+	// Sound Cue for when Enemy gets hit
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	class USoundCue* HitSound;
+	
 	// TArray container of type FVector
 	TArray<FVector> PickupLocations; 
 	
@@ -60,7 +82,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	float MinSprintStamina; 
 
+	float InterpSpeed;
 
+	bool bInterpToEnemy;
+
+	void SetInterpToEnemy(bool Interp); 
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	class AEnemy* CombatTarget;
+
+	FORCEINLINE void SetCombatTarget(AEnemy* Target) { CombatTarget = Target; }
+
+	FRotator GetLookAtRotationYaw(FVector Target);
+
+	
 	// Set Movement status and running speed
 	void SetMovementStatus(EMovementStatus Status);
 
@@ -129,6 +164,12 @@ public:
 	void IncrementCoin(int32 Amount);
 
 	void DecrementHealth(float Amount);
+
+	// Override TakeDamage() function from AActor
+	virtual float TakeDamage(float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator,
+		AActor* DamageCauser) override;
 
 	void Die(); 
 

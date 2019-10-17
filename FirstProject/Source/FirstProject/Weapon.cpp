@@ -89,6 +89,9 @@ void AWeapon::Equip(AMainCharacter* Char)
 {
 	if (Char)
 	{
+		// Set integator as Controller from MainCharacter
+		SetInstigator(Char->GetController());
+
 		// Set Camera to ignore the SkeletalMesh of the Weapon when coming between MainCharacter and the Camera
 		SkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
@@ -157,6 +160,11 @@ void AWeapon::CombatOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 			if (Enemy->HitSound)
 			{
 				UGameplayStatics::PlaySound2D(this, Enemy->HitSound);
+			}
+			if (DamageTypeClass)
+			{
+				// Call ApplyDamage function and pass in parameters created in Weapon.h
+				UGameplayStatics::ApplyDamage(Enemy, Damage, WeaponInstigator, this, DamageTypeClass);
 			}
 
 		}
