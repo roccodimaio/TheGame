@@ -12,6 +12,7 @@ enum class EMovementStatus : uint8
 {
 	EMS_Normal UMETA(DisplayName = "Normal"),
 	EMS_Sprinting UMETA(DisplayName = "Sprinting"),
+	EMS_Dead UMETA(DisplayName = "Dead"),
 	EMS_MAX UMETA(DisplayName = "DefaultMAX"),
 };
 
@@ -58,6 +59,11 @@ public:
 	// Sound Cue for when Enemy gets hit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	class USoundCue* HitSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float Attack2Damage; 
+
+	bool bAttack2; 
 	
 	// TArray container of type FVector
 	TArray<FVector> PickupLocations; 
@@ -161,7 +167,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
 	int32 PowerCells; 
 
+	UFUNCTION(BlueprintCallable)
 	void IncrementCoin(int32 Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void IncrementHealth(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void IncrementMana(float Amount);
 
 	void DecrementHealth(float Amount);
 
@@ -172,6 +185,8 @@ public:
 		AActor* DamageCauser) override;
 
 	void Die(); 
+
+	virtual void Jump() override;
 
 
 protected:
@@ -188,8 +203,12 @@ public:
 	// Called for forwards/backwards input from keyboard, mouse, and controller
 	void MoveForward(float value);
 
+	bool bMovingForward;
+
 	// Called for side to side input from keyboard, mouse, and controller
 	void MoveRight(float value);
+
+	bool bMovingRight;
 
 	/** Called via input to turn a given rate
 	*@param Rate This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
@@ -237,4 +256,12 @@ public:
 	// Function to play sound from AnimMontage notifiers
 	UFUNCTION(BlueprintCallable)
 	void PlaySwingSound();
+
+	UFUNCTION(BlueprintCallable)
+	void DeathEnd();
+
+	void UpdateCombatTarget(); 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<AEnemy> EnemyFilter; 
 };

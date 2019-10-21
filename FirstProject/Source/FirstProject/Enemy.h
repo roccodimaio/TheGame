@@ -28,6 +28,8 @@ public:
 	// Sets default values for this character's properties
 	AEnemy();
 
+	bool bHasValidTarget; 
+
 	// Declare a variable for EEnemyMovementStatus
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	EEnemyMovementStatus EnemyMovementStatus;
@@ -158,7 +160,7 @@ public:
 		class AController* EventInstigator,
 		AActor* DamageCauser) override;
 
-	void Die(); 
+	void Die(AActor* Causer); 
 
 	UFUNCTION(BlueprintCallable)
 	void DeathEnd();

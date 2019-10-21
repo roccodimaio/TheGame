@@ -3,6 +3,10 @@
 
 #include "Explosive.h"
 #include "MainCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "Sound/SoundCue.h"
+#include "Enemy.h"
 
 AExplosive::AExplosive()
 {
@@ -13,7 +17,7 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 {
 	Super::OnOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
-	UE_LOG(LogTemp, Warning, TEXT("Explosive::OnOverLapBegin()"));
+	//UE_LOG(LogTemp, Warning, TEXT("Explosive::OnOverLapBegin()"));
 
 	// Check the actor that is overlapping
 	if (OtherActor)
@@ -21,11 +25,25 @@ void AExplosive::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 		// Cast the retruned OtherActor to the MainCharacter which is an AMainCharater class
 		AMainCharacter* MainCharacter = Cast<AMainCharacter>(OtherActor);
 		
-		// Check if MainCharactor has been assigned a Character class
-		if (MainCharacter)
-		{
-			MainCharacter->DecrementHealth(Damage);
+		AEnemy* Enemy = Cast<AEnemy>(OtherActor);
 
+		// Check if MainCharactor has been assigned a Character class
+		if (MainCharacter || Enemy)
+		{
+			// Check if OverlapParticles has been set via blueprint
+			if (OverlapParticles)
+			{
+				// Spawn particle OverlapParticles on OverlapBegin
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), OverlapParticles, GetActorLocation(), FRotator(0.0f), true);
+			}
+
+			if (OverlapSound)
+			{
+				UGameplayStatics::PlaySound2D(this, OverlapSound);
+			}
+
+			UGameplayStatics::ApplyDamage(OtherActor, Damage, nullptr, this, DamageTypeClass);
+			
 			Destroy();
 		}
 	}

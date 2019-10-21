@@ -1,0 +1,18 @@
+MinionDawn--
+
+SkeletalMesh: Minion_Lane_Melee_Core_Dawn
+Skeleton: Minion_Lane_Core_Skeleton
+BlendSpace: IdleToRun_A_Combat
+
+MinionDusk--
+
+SkeletalMesh: Minion_Lane_Melee_Dusk
+Skeleton: Minion_Lane_Core_Skeleton
+BlendSpace: IdleToRun_A_Combat
+
+
+LightMinion--
+Skeletal Mesh:Buff_White
+Skeleton: Minion_Skeleton
+Blendspace: Melee_Idle_Jogs_Runs_BS_A
+

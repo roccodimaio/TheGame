@@ -70,6 +70,9 @@ AMainCharacter::AMainCharacter()
 
 	bActionDown = false; 
 
+	Attack2Damage = 10; 
+	bAttack2 = false; 
+
 	// Initialize ENUMS
 	MovementStatus = EMovementStatus::EMS_Normal;
 	StaminaStatus = EStaminaStatus::ESS_Normal;
@@ -81,6 +84,9 @@ AMainCharacter::AMainCharacter()
 	bInterpToEnemy = false; 
 
 	bHasCombatTarget = false; 
+
+	bMovingForward = false; 
+	bMovingRight = false; 
 
 }
 
@@ -99,6 +105,11 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (MovementStatus == EMovementStatus::EMS_Dead)
+	{
+		return; 
+	}
+	
 	float DeltaStamina = StaminaDrainRate * DeltaTime;
 	
 	//UE_LOG(LogTemp, Warning, TEXT("ActionDown = %s!"), bActionDown ? TEXT("True") : TEXT("False"));
@@ -109,8 +120,10 @@ void AMainCharacter::Tick(float DeltaTime)
 	switch (StaminaStatus)
 	{
 	case EStaminaStatus::ESS_Normal:
-		if (bSprintingKeyPressed) // Sprinting key pressed
+		if (bSprintingKeyPressed) 
 		{
+			
+			UE_LOG(LogTemp, Warning, TEXT("In ESS_Normal->bSprintKeyPressed_01"));
 			// Check if next change will put us into the BelowMinimum state
 			if (Stamina - DeltaStamina <= MinSprintStamina)
 			{
@@ -122,7 +135,17 @@ void AMainCharacter::Tick(float DeltaTime)
 				Stamina -= DeltaStamina;
 			}
 
-			SetMovementStatus(EMovementStatus::EMS_Sprinting);
+			if (bMovingForward || bMovingRight)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("In ESS_Normal->bSprintKeyPressed_02"));
+				SetMovementStatus(EMovementStatus::EMS_Sprinting);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("In ESS_Normal->bSprintKeyPressed_03"));
+				SetMovementStatus(EMovementStatus::EMS_Normal);
+			}
+			
 		}
 		else // Sprinting key not pressed
 		{
@@ -149,7 +172,15 @@ void AMainCharacter::Tick(float DeltaTime)
 			else
 			{
 				Stamina -= DeltaStamina; 
-				SetMovementStatus(EMovementStatus::EMS_Sprinting);
+
+				if (bMovingForward || bMovingRight)
+				{
+					SetMovementStatus(EMovementStatus::EMS_Sprinting);
+				}
+				else
+				{
+					SetMovementStatus(EMovementStatus::EMS_Normal);
+				}
 			}
 		}
 		else // Sprinting key not pressed
@@ -229,7 +260,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	// Check that PlayerInput is valid
 	check(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMainCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AMainCharacter::SprintingKeyPressed);
@@ -247,6 +278,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	/** Call MoveRight when any of the keys/buttons associated with the Axis Mapping "MoveRight" are pressed
 	"MoveRight" is the name of Axis Mapping in Project Settings - Input.
 	*/
+	//PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
+
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
@@ -260,7 +293,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::MoveForward(float value)
 {
-	if ((Controller != nullptr) && (value != 0.0f) && (!bAttacking))
+	bMovingForward = false; 
+	if ((Controller != nullptr) && (value != 0.0f) && (!bAttacking) && (MovementStatus != EMovementStatus::EMS_Dead))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation(); 
@@ -271,12 +305,17 @@ void AMainCharacter::MoveForward(float value)
 		
 		// Adding movement input in the direction calculated above
 		AddMovementInput(Direction, value);
+
+		//UE_LOG(LogTemp, Warning, TEXT("In MoveForward_01"));
+		bMovingForward = true; 
 	}
 }
 
 void AMainCharacter::MoveRight(float value)
 {
-	if ((Controller != nullptr) && (value != 0.0f), (!bAttacking))
+	bMovingRight = false; 
+	
+	if ((Controller != nullptr) && (value != 0.0f), (!bAttacking) && (MovementStatus != EMovementStatus::EMS_Dead))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -287,6 +326,9 @@ void AMainCharacter::MoveRight(float value)
 
 		// Adding movement input in the direction calculated above
 		AddMovementInput(Direction, value);
+
+		UE_LOG(LogTemp, Warning, TEXT("In MoveRight_01"));
+		bMovingRight = true; 
 	}
 }
 
@@ -304,6 +346,12 @@ void AMainCharacter::ActionButtonPressed()
 {
 	// Functionality to equip weapong
 	bActionDown = true;
+
+	if (MovementStatus == EMovementStatus::EMS_Dead)
+	{
+		return; 
+	}
+
 	if (ActiveOverlappingItem)  // if main character is overlapping an item
 	{
 		AWeapon* Weapon = Cast<AWeapon>(ActiveOverlappingItem);  // Create an instance of AWeapon and cast the overlapping item to it
@@ -340,7 +388,7 @@ void AMainCharacter::Attack()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("In Attack()!, bAttacking is %s"), bAttacking ? TEXT("True") : TEXT("False"));
 
-	if (!bAttacking)
+	if (!bAttacking && MovementStatus != EMovementStatus::EMS_Dead)
 	{
 		bAttacking = true;
 
@@ -352,10 +400,16 @@ void AMainCharacter::Attack()
 		{
 			int32 Selection = FMath::RandRange(0, 1);  //create a random number between 0 and 1 (either 0 or 1)
 			
-			// switch statement, will run the appropriate case based on teh value of Section
+			// switch statement, will run the appropriate case based on the value of Selection
 			switch (Selection)
 			{
 			case 0:
+
+				if (bAttack2)
+				{
+					bAttack2 = false; 
+					EquippedWeapon->Damage -= Attack2Damage;
+				}
 
 				// Play Combat Montage
 				AnimInstance->Montage_Play(CombatMontage, 2.2f); // Play the montage CombatMontage at 135% speed
@@ -363,9 +417,15 @@ void AMainCharacter::Attack()
 				break;
 			case 1:
 				
+				if (!bAttack2)
+				{
+					bAttack2 = true;
+					EquippedWeapon->Damage += Attack2Damage;
+				}
+				
 				// Play Combat Montage
 				AnimInstance->Montage_Play(CombatMontage, 1.5f); // Play the montage CombatMontage at 135% speed
-				AnimInstance->Montage_JumpToSection(FName("Attack_2"), CombatMontage); // Play only the Attack_1 Section on CombatMontage
+				AnimInstance->Montage_JumpToSection(FName("Attack_2"), CombatMontage); // Play only the Attack_2 Section on CombatMontage
 				break;
 			
 			default:
@@ -413,23 +473,66 @@ void AMainCharacter::IncrementCoin(int32 Amount)
 	
 }
 
-// Reduce health when damage is taken
-void AMainCharacter::DecrementHealth(float Amount)
+void AMainCharacter::IncrementHealth(float Amount)
 {
-	if (Health - Amount <= 0.0f)
+	if (Health + Amount >= MaxHealth)
 	{
-		Health -= Amount; 
+		Health = MaxHealth;
+	}
+	else
+	{
+		Health += Amount;
+	}
+
+}
+
+void AMainCharacter::IncrementMana(float Amount)
+{
+	if (Mana + Amount >= MaxMana)
+	{
+		Mana = MaxMana;
+	}
+	else
+	{
+		Mana += Amount;
+	}
+}
+
+// Reduce health when damage is taken
+void AMainCharacter::DecrementHealth(float DamageAmount)
+{
+	if (Health - DamageAmount <= 0.0f)
+	{
+		Health -= DamageAmount;
 		Die();
 	}
 	else
 	{
-		Health -= Amount; 
+		Health -= DamageAmount;
 	}
 }
 
 float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	DecrementHealth(DamageAmount);
+	if (Health - DamageAmount <= 0.0f)
+	{
+		Health -= DamageAmount;
+		Die();
+
+		if (DamageCauser)
+		{
+			AEnemy* Enemy = Cast<AEnemy>(DamageCauser);
+			if (Enemy)
+			{
+				Enemy->bHasValidTarget = false; 
+			}
+		}
+	}
+	else
+	{
+		Health -= DamageAmount;
+	}
+
 	return DamageAmount;
 }
 
@@ -442,7 +545,87 @@ void AMainCharacter::Die()
 		AnimInstance->Montage_Play(CombatMontage, 1.0f);
 		AnimInstance->Montage_JumpToSection(FName("Death"));
 	}
+	SetMovementStatus(EMovementStatus::EMS_Dead);
 }
+
+
+void AMainCharacter::Jump()
+{
+	// Check if Dead, if so do nothing, if not call ACharacter::Jump(); 
+	if (MovementStatus != EMovementStatus::EMS_Dead)
+	{
+		ACharacter::Jump(); 
+	}
+}
+
+void AMainCharacter::DeathEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("In DeathEnd()"));
+
+	// Stop animations after death
+	GetMesh()->bPauseAnims = true;
+	GetMesh()->bNoSkeletonUpdate = true;
+}
+
+void AMainCharacter::UpdateCombatTarget()
+{
+	TArray<AActor*> OverlappingActors;
+
+	// Get all actors that are of type Enemy that are overlapping with MainCharacter and store in TArray OverlapptingActors
+	GetOverlappingActors(OverlappingActors, EnemyFilter);
+
+	// Check to see if OverlappingActors TArray is empty
+	if (OverlappingActors.Num() == 0)
+	{
+		if (MainPlayerController)
+		{
+			MainPlayerController->RemoveEnemyHealthBar(); 
+		}
+		return; 
+	}
+	
+	AEnemy* ClosestEnemy = Cast<AEnemy>(OverlappingActors[0]);
+
+	if (ClosestEnemy)
+	{
+		
+		FVector Location = GetActorLocation(); 
+		
+
+		// Distance between the ClosestEnemy and the MainCharacter
+		float MinDistance = (ClosestEnemy->GetActorLocation() - Location).Size();
+
+		// Loop through OverlappingActors
+		for (auto Actor : OverlappingActors)
+		{
+			AEnemy* Enemy = Cast<AEnemy>(Actor); 
+
+			if (Enemy)
+			{
+				float DistanceToActor = (Enemy->GetActorLocation() - Location).Size();
+
+				if (DistanceToActor < MinDistance)
+				{
+					MinDistance = DistanceToActor;
+					ClosestEnemy = Enemy; 
+				}
+			}
+			
+			if (MainPlayerController)
+			{
+				MainPlayerController->DisplayEnemyHealthBar();
+			}
+
+			SetCombatTarget(ClosestEnemy);
+			bHasCombatTarget = true; 
+
+		}
+	}
+	
+	
+
+}
+
 
 void AMainCharacter::ShowPickupLocations()
 {
