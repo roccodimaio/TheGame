@@ -17,6 +17,7 @@
 #include "Animation/AnimInstance.h"
 #include "Enemy.h"
 #include "MainPlayerController.h"
+#include "FirstProjectSaveGame.h"
 
 
 // Sets default values
@@ -678,4 +679,62 @@ void AMainCharacter::SprintingKeyPressed()
 void AMainCharacter::SprintingKeyReleased()
 {
 	bSprintingKeyPressed = false; 
+}
+
+void AMainCharacter::SwitchLevel(FName LevelName)
+{
+	UWorld* World = GetWorld();
+
+	if (World)
+	{
+		// Assign the name of the current level CurrentLevel
+		FString CurrentLevel = World->GetMapName();
+
+		FName CurrentLevelName(*CurrentLevel);
+
+		if (CurrentLevelName != LevelName)
+		{
+			// Call funtion OpenLevel to open the new level
+			UGameplayStatics::OpenLevel(World, LevelName);
+		}
+	}
+}
+
+void AMainCharacter::SaveGame()
+{
+	UFirstProjectSaveGame* SaveGameInstance = Cast<UFirstProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UFirstProjectSaveGame::StaticClass()));
+
+	SaveGameInstance->CharacterStats.Health = Health; 
+	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
+	SaveGameInstance->CharacterStats.Mana = Mana; 
+	SaveGameInstance->CharacterStats.MaxMana = MaxMana;
+	SaveGameInstance->CharacterStats.Stamina = Stamina;
+	SaveGameInstance->CharacterStats.MaxStamina = MaxStamina; 
+	SaveGameInstance->CharacterStats.PowerCells = PowerCells; 
+
+	SaveGameInstance->CharacterStats.Location = GetActorLocation();
+	SaveGameInstance->CharacterStats.Rotation = GetActorRotation();
+
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->PlayerName, SaveGameInstance->UserIndex);
+}
+
+void AMainCharacter::LoadGame(bool SetPostion)
+{
+	UFirstProjectSaveGame* LoadGameInstance = Cast<UFirstProjectSaveGame>(UGameplayStatics::CreateSaveGameObject(UFirstProjectSaveGame::StaticClass()));
+
+	LoadGameInstance = Cast<UFirstProjectSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->PlayerName, LoadGameInstance->UserIndex));
+
+	Health = LoadGameInstance->CharacterStats.Health;
+	MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
+	Mana = LoadGameInstance->CharacterStats.Mana;
+	MaxMana = LoadGameInstance->CharacterStats.MaxMana;
+	Stamina = LoadGameInstance->CharacterStats.Stamina;
+	MaxStamina = LoadGameInstance->CharacterStats.MaxStamina;
+	PowerCells = LoadGameInstance->CharacterStats.PowerCells;
+
+	if (SetPostion)
+	{
+		SetActorLocation(LoadGameInstance->CharacterStats.Location);
+		SetActorRotation(LoadGameInstance->CharacterStats.Rotation);
+	}
 }

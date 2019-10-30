@@ -18,10 +18,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
 	class UBoxComponent* SpawningBox;
 
-	// Assigns the Critter_BP blueprint to the variable PawnToSpawn
+	// Allows all Actors to be spawned (items, explosions, enemies, etc.)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
-	TSubclassOf<class ACritter> PawnToSpawn; 
+	TSubclassOf<class AActor> Actor_1; 
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
+	TSubclassOf<class AActor> Actor_2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
+	TSubclassOf<class AActor> Actor_3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
+	TSubclassOf<class AActor> Actor_4;
+
+	TArray< TSubclassOf<class AActor>> SpawnArray;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -33,7 +43,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spawning")
 	FVector GetSpawnPoint();
 
+	UFUNCTION(BlueprintPure, Category = "Spawning")
+	TSubclassOf<AActor> GetSpawnActor(); 
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spawning")
-	void SpawnOurPawn(UClass* ToSpawn, const FVector& Location);
+	void SpawnOurActor(UClass* ToSpawn, const FVector& Location);
 
 };
