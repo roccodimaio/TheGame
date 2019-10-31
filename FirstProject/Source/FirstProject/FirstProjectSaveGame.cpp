@@ -8,4 +8,6 @@ UFirstProjectSaveGame::UFirstProjectSaveGame()
 	PlayerName = TEXT("Defult");
 
 	UserIndex = 0; 
+
+	CharacterStats.WeaponName = TEXT(""); 
 }
