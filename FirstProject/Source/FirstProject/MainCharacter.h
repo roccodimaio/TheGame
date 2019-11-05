@@ -228,6 +228,11 @@ public:
 
 	bool bActionDown; 
 
+	void ESCButtonPressed();
+	void ESCButtonReleased();
+
+	bool bESCDown;
+
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 

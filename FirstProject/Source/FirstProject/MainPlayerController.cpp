@@ -39,7 +39,25 @@ void AMainPlayerController::BeginPlay()
 		FVector2D Alignment(0.0f, 0.0f);
 		EnemyHealthBar->SetAlignmentInViewport(Alignment);
 	}
+		
+	// Show Pause Menu
+	if (WPauseMenu)
+	{
 
+		// if so assign the Enemy health bar to EnemyHealthBar
+		PauseMenu = CreateWidget<UUserWidget>(this, WPauseMenu);
+
+		// Check for PauseMenu
+		if (PauseMenu)
+		{
+			// Add the PauseMenu to the view port
+			PauseMenu->AddToViewport();
+
+			// Hide the PauseMenu on the view port
+			PauseMenu->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+	}
 
 
 }
@@ -85,6 +103,38 @@ void AMainPlayerController::RemoveEnemyHealthBar()
 	{
 		bEnemyHealthBarVisible = false;
 		EnemyHealthBar->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void AMainPlayerController::DisplayPauseMenu_Implementation()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("In MainPlayerController->DisplayPauseMenu()_01"));
+	if (PauseMenu)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("In MainPlayerController->DisplayEnemyHealthBar()_02"));
+		bPauseMenuVisible = true;
+		PauseMenu->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void AMainPlayerController::RemovePauseMenu_Implementation()
+{
+	if (PauseMenu)
+	{
+		bPauseMenuVisible = false;
+		PauseMenu->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void AMainPlayerController::TogglePauseMenu()
+{
+	if (bPauseMenuVisible)
+	{
+		RemovePauseMenu();
+	}
+	else
+	{
+		DisplayPauseMenu(); 
 	}
 }
 

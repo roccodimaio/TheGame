@@ -72,6 +72,9 @@ AMainCharacter::AMainCharacter()
 
 	bActionDown = false; 
 
+	bESCDown = false;
+
+
 	Attack2Damage = 10; 
 	bAttack2 = false; 
 
@@ -271,6 +274,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &AMainCharacter::ActionButtonPressed);
 	PlayerInputComponent->BindAction("Action", IE_Released, this, &AMainCharacter::ActionButtonReleased);
 
+	PlayerInputComponent->BindAction("ESC", IE_Pressed, this, &AMainCharacter::ESCButtonPressed);
+	PlayerInputComponent->BindAction("ESC", IE_Released, this, &AMainCharacter::ESCButtonReleased);
 
 	/** Call MoveForward when any of the keys/buttons associated with the Axis Mapping "MoveForward" are pressed
 	"MoveForward" is the name of Axis Mapping in Project Settings - Input.  
@@ -374,6 +379,21 @@ void AMainCharacter::ActionButtonPressed()
 void AMainCharacter::ActionButtonReleased()
 {
 	bActionDown = false; 
+}
+
+void AMainCharacter::ESCButtonPressed()
+{
+	bESCDown = true; 
+
+	if (MainPlayerController)
+	{
+		MainPlayerController->TogglePauseMenu(); 
+	}
+}
+
+void AMainCharacter::ESCButtonReleased()
+{
+	bESCDown = false;
 }
 
 void AMainCharacter::EquippedWeapton(AWeapon* WeaponToSet)
