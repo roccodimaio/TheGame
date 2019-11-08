@@ -111,9 +111,15 @@ void AMainPlayerController::DisplayPauseMenu_Implementation()
 	//UE_LOG(LogTemp, Warning, TEXT("In MainPlayerController->DisplayPauseMenu()_01"));
 	if (PauseMenu)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("In MainPlayerController->DisplayEnemyHealthBar()_02"));
+		//UE_LOG(LogTemp, Warning, TEXT("In MainPlayerController->DisplayEnemyHealthBar()_02"));
 		bPauseMenuVisible = true;
 		PauseMenu->SetVisibility(ESlateVisibility::Visible);
+
+		
+		FInputModeGameAndUI InputModeGameAndUI;
+		
+		SetInputMode(InputModeGameAndUI);
+		bShowMouseCursor = true; 
 	}
 }
 
@@ -121,8 +127,11 @@ void AMainPlayerController::RemovePauseMenu_Implementation()
 {
 	if (PauseMenu)
 	{
+		GameModeOnly(); 
+
+		bShowMouseCursor = false;
+		
 		bPauseMenuVisible = false;
-		PauseMenu->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -136,5 +145,12 @@ void AMainPlayerController::TogglePauseMenu()
 	{
 		DisplayPauseMenu(); 
 	}
+}
+
+void AMainPlayerController::GameModeOnly()
+{
+	FInputModeGameOnly InputModeGameOnly;
+
+	SetInputMode(InputModeGameOnly);
 }
 

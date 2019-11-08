@@ -213,6 +213,14 @@ public:
 
 	bool bMovingRight;
 
+	bool CanMove(float Value);
+
+	// Called for Yaw rotation
+	void Turn(float value);
+
+	// Called for Pitch rotation
+	void LookUp(float value);
+	 
 	/** Called via input to turn a given rate
 	*@param Rate This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	*/
@@ -281,4 +289,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void LoadGame(bool SetPosition); 
+
+	void LoadGameNoSwitch();
 };

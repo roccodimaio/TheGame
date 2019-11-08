@@ -9,5 +9,7 @@ UFirstProjectSaveGame::UFirstProjectSaveGame()
 
 	UserIndex = 0; 
 
-	CharacterStats.WeaponName = TEXT(""); 
+	CharacterStats.WeaponName = TEXT("");
+
+	CharacterStats.LevelName = TEXT("");
 }
