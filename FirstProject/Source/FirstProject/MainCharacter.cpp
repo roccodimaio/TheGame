@@ -103,13 +103,20 @@ void AMainCharacter::BeginPlay()
 
 	MainPlayerController = Cast<AMainPlayerController>(GetController());
 
-	LoadGameNoSwitch();
+	FString Map = GetWorld()->GetMapName();
 
-	if (MainPlayerController)
+	Map.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+
+	if (Map != "SunTemple")
 	{
-		MainPlayerController->GameModeOnly(); 
+		LoadGameNoSwitch();
+
+		if (MainPlayerController)
+		{
+			MainPlayerController->GameModeOnly();
+		}
 	}
-	
+		
 }
 
 // Called every frame
